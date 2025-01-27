@@ -1,0 +1,20 @@
+[
+    {
+        "input": "scala/213/playframework/rest-json-api/router.scala",
+        "output": "PostRouter.out.scala",
+        "data": {
+            "uriPattern": "/v1/posts",
+            "router": { "package": "v1.post", "simpleClassName": "PostRouter" },
+            "controller": { "package": "v1.post", "simpleClassName": "PostController" }
+        }
+    },
+    {
+        "input": "scala/213/playframework/rest-json-api/controller.scala",
+        "output": "PostController.out.scala",
+        "data": {
+            "controller": { "package": "v1.post", "simpleClassName": "PostController" },
+            "model": { "package": "v1.post", "simpleClassName": "Post" },
+            "form": { "package": "v1.post", "simpleClassName": "PostForm" }
+        }
+    }
+]
