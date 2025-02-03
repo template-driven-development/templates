@@ -1,0 +1,15 @@
+{
+    "uri": "/posts",
+    "router" : {
+        "package": "com.github.ttd.posts",
+        "simpleClassName": "PostRouter"
+    },
+    "form": {
+        "package": "com.github.ttd.models",
+        "simpleClassName": "PostForm"
+    },
+    "model": {
+        "package": "com.github.ttd.models",
+        "simpleClassName": "Post"
+    }
+}

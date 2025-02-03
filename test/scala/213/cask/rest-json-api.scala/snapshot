@@ -1,0 +1,121 @@
+// 1. Create com.github.ttd.models.Post with an implicit upickle.default.Writer
+// 2. Create com.github.ttd.models.PostForm with an implicit upickle.default.Reader
+// 3. Create PostRouterFunctions implementation
+// 4. Add instance of PostRouter to cask.Main.allRoutes
+
+package com.github.ttd.posts
+
+class PostRouter(functions: PostRouterFunctions) extends cask.Routes {
+  @cask.get("/posts")
+  def index() =
+    functions.index() match {
+      case PostRouterFunctions.IndexResult.Success(value) =>
+        cask.Response(
+          upickle.default.write(value),
+          headers = Seq("Content-Type" -> "application/json")
+        )
+      case PostRouterFunctions.IndexResult.Failure(cause) =>
+        cask.Response(cause.getMessage, statusCode = 500)
+    }
+
+  @cask.post("/posts")
+  def create(request: cask.Request) = {
+    val form = upickle.default.read[com.github.ttd.models.PostForm](request.text())
+    functions.create(form) match {
+      case PostRouterFunctions.CreateResult.Success(value) =>
+        cask.Response(
+          upickle.default.write(value),
+          statusCode = 201,
+          headers = Seq("Content-Type" -> "application/json")
+        )
+      case PostRouterFunctions.CreateResult.Failure(cause) =>
+        cask.Response(cause.getMessage, statusCode = 500)
+    }
+  }
+
+  @cask.getJson("/posts/:id")
+  def show(id: String) =
+    functions.show(id) match {
+      case PostRouterFunctions.ShowResult.Success(value) =>
+        cask.Response(
+          upickle.default.write(value),
+          headers = Seq("Content-Type" -> "application/json")
+        )
+      case PostRouterFunctions.ShowResult.NotFound =>
+        cask.Response("", statusCode = 404)
+      case PostRouterFunctions.ShowResult.Failure(cause) =>
+        cask.Response(cause.getMessage, statusCode = 500)
+    }
+
+  @cask.put("/posts/:id")
+  def update(id: String, request: cask.Request) = {
+    val form = upickle.default.read[com.github.ttd.models.PostForm](request.text())
+    functions.update(id, form) match {
+      case PostRouterFunctions.UpdateResult.Success(value) =>
+        cask.Response(
+          upickle.default.write(value),
+          headers = Seq("Content-Type" -> "application/json")
+        )
+      case PostRouterFunctions.UpdateResult.NotFound =>
+        cask.Response("", statusCode = 404)
+      case PostRouterFunctions.UpdateResult.Failure(cause) =>
+        cask.Response(cause.getMessage, statusCode = 500)
+    }
+  }
+
+  @cask.delete("/posts/:id")
+  def delete(id: String) =
+    functions.delete(id) match {
+      case PostRouterFunctions.DeleteResult.Success =>
+        cask.Response("", statusCode = 204)
+      case PostRouterFunctions.DeleteResult.NotFound =>
+        cask.Response("", statusCode = 404)
+      case PostRouterFunctions.DeleteResult.Failure(cause) =>
+        cask.Response(cause.getMessage, statusCode = 500)
+    }
+
+  initialize()
+}
+
+object PostRouterFunctions {
+  trait IndexResult
+  object IndexResult {
+    case class Success(value: List[com.github.ttd.models.Post]) extends IndexResult
+    case class Failure(cause: Throwable) extends IndexResult
+  }
+
+  trait CreateResult
+  object CreateResult {
+    case class Success(value: com.github.ttd.models.Post) extends CreateResult
+    case class Failure(cause: Throwable) extends CreateResult
+  }
+
+  trait ShowResult
+  object ShowResult {
+    case class Success(value: com.github.ttd.models.Post) extends ShowResult
+    case object NotFound extends ShowResult
+    case class Failure(cause: Throwable) extends ShowResult
+  }
+
+  trait UpdateResult
+  object UpdateResult {
+    case class Success(value: com.github.ttd.models.Post) extends UpdateResult
+    case object NotFound extends UpdateResult
+    case class Failure(cause: Throwable) extends UpdateResult
+  }
+
+  trait DeleteResult
+  object DeleteResult {
+    case object Success extends DeleteResult
+    case object NotFound extends DeleteResult
+    case class Failure(cause: Throwable) extends DeleteResult
+  }
+}
+
+trait PostRouterFunctions {
+  def index(): PostRouterFunctions.IndexResult
+  def create(form: com.github.ttd.models.PostForm): PostRouterFunctions.CreateResult
+  def show(id: String): PostRouterFunctions.ShowResult
+  def update(id: String, form: com.github.ttd.models.PostForm): PostRouterFunctions.UpdateResult
+  def delete(id: String): PostRouterFunctions.DeleteResult
+}

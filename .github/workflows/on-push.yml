@@ -1,0 +1,21 @@
+name: On push
+
+on:
+  push:
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
+
+    - name: Install TDD
+      run: go install github.com/template-driven-development/tdd@latest
+
+    - name: Test
+      run: go test -v test/*_test.go
